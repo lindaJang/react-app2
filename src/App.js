@@ -1,72 +1,54 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 
-class App extends React.Component{
+const HOC = (InnerComponent) => class extends React.Component{
     constructor(){
-        super();
-        this.state = {
-            red:0
-        }
-        this.update = this.update.bind(this)
+      super();
+      this.state = {count: 0}
     }
-    update(e){
-        this.setState({
-        red: ReactDOM.findDOMNode(this.refs.red.refs.inp).value
-    })
+    update(){
+        this.setState({count: this.state.count + 1})
+    }
+    componentWillMount(){
+        console.log('will mount')
     }
     render(){
         return (
-            <div>
-                <NumInput
-                    ref="red"
-                    min={0}
-                    max={255}
-                    step={0.01}
-                    val={+this.state.red}
-                    label="Red"
-                    update={this.update} />
-            </div>
+            <InnerComponent
+                {...this.props}
+                {...this.state}
+                update={this.update.bind(this)}
+            />
         )
     }
 }
 
-class NumInput extends React.Component{
+class App extends React.Component{
     render(){
-        let label = this.props.label !== ''?
-            <label>{this.props.label} - {this.props.val}</label> : ''
         return(
             <div>
-                <input ref="inp"
-                       type={this.props.type}
-                       min={this.props.min}
-                       max={this.props.max}
-                       step={this.props.step}
-                       defaultValue={this.props.val}
-                       onChange={this.props.update} />
-                {label}
+                <Button>button</Button>
+                <hr/>
+                <LabelHOC>label</LabelHOC>
             </div>
         )
     }
 }
 
-NumInput.propTypes = {
-    min: React.PropTypes.number,
-    max: React.PropTypes.number,
-    step: React.PropTypes.number,
-    val: React.PropTypes.number,
-    label: React.PropTypes.string,
-    update: React.PropTypes.func.isRequired,
-    type: React.PropTypes.oneOf(['number','range'])
+const Button = HOC((props) =>
+    <button onClick={props.update}>{props.children} - {props.count}</button>)
+
+
+class Label extends React.Component{
+    componentWillMount(){
+        console.log('label will mount')
+    }
+    render(){
+        return (
+            <lebel onMouseMove={this.props.update}>{this.props.children} - {this.props.count}</lebel>
+        )
+    }
 }
 
-NumInput.defaultProps={
-    min: 0,
-    max: 0,
-    step: 1,
-    val: 0,
-    label: '',
-    type: 'range'
-
-}
+const LabelHOC = HOC(Label)
 
 export default App
